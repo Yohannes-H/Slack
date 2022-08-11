@@ -1,10 +1,28 @@
 import React from "react";
 import styled from "styled-components";
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "../firebase";
+import { useDispatch } from "react-redux";
+import { enterRoom } from "../features/appSlice";
+function SidebarOption({ Icon, title, addChannelOption, id }) {
+  const dispatch = useDispatch();
 
-function SidebarOption({ Icon, title, addChannelOption }) {
-  const addChannel = () => {};
+  const addChannel = async () => {
+    console.log("prop test", addChannelOption);
+    const channelName = prompt("Please enter the channel name");
+    if (channelName) {
+      const docRef = await addDoc(collection(db, "rooms"), {
+        name: channelName,
+      });
+      console.log("Document written with ID: ", docRef.id);
+    }
+  };
 
-  const selectChannel = () => {};
+  const selectChannel = () => {
+    if (id) {
+      dispatch(enterRoom({ roomId: id }));
+    }
+  };
 
   return (
     <SidebarOptionContainer
@@ -43,4 +61,7 @@ const SidebarOptionContainer = styled.div`
   }
 `;
 
-const SidebarOptionChannel = styled.div``;
+const SidebarOptionChannel = styled.h3`
+  padding: 10px 0;
+  font-weight: 300;
+`;

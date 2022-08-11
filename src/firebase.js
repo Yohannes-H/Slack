@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
-
+import { getFirestore } from "firebase/firestore";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 const firebaseConfig = {
   apiKey: "AIzaSyDQASCHoRvh4OefqV_YKxEI27piJ0j3OD8",
   authDomain: "slack-clone-285aa.firebaseapp.com",
@@ -10,4 +11,9 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
+const auth = getAuth(firebaseApp);
+const provider = new GoogleAuthProvider();
+
+export { auth, db, provider };
