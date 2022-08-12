@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useDispatch } from "react-redux";
-import { enterRoom } from "../features/appSlice";
+import { enterRoom, setMessages } from "../features/appSlice";
 function SidebarOption({ Icon, title, addChannelOption, id }) {
   const dispatch = useDispatch();
 

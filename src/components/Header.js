@@ -4,12 +4,28 @@ import styled from "styled-components";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import SearchIcon from "@mui/icons-material/Search";
 import HelpIcon from "@mui/icons-material/Help";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../firebase";
+import { signOut } from "firebase/auth";
 function Header() {
+  const [user] = useAuthState(auth);
   return (
     <HeaderContainer>
       {/*Header left */}
       <HeaderLeft>
-        <HeaderAvatar />
+        <HeaderAvatar
+          onClick={() => {
+            signOut(auth)
+              .then(() => {
+                // Sign-out successful.
+              })
+              .catch((error) => {
+                // An error happened.
+              });
+          }}
+          src={user?.photoURL}
+          alt={user?.displayName}
+        />
         <AccessTimeIcon />
       </HeaderLeft>
       {/**Header search */}

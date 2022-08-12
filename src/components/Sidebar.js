@@ -15,8 +15,10 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AddIcon from "@mui/icons-material/Add";
 import { useCollection } from "react-firebase-hooks/firestore";
 import { collection } from "firebase/firestore";
-import { db } from "../firebase";
+import { auth, db } from "../firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
 function Sidebar() {
+  const [user] = useAuthState(auth);
   const [channels, loading, error] = useCollection(collection(db, "rooms"), {
     snapshotListenOptions: { includeMetadataChanges: true },
   });
@@ -30,7 +32,7 @@ function Sidebar() {
 
           <h3>
             <FiberManualRecord />
-            Johnny H
+            {user.displayName}
           </h3>
         </SidebarInfo>
         <CreateIcon />

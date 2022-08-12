@@ -17,7 +17,10 @@ import {
 import { db } from "../firebase";
 import { setMessages, selectMessages } from "../features/appSlice";
 import { useDispatch } from "react-redux";
+import Message from "./Message";
 function Chat() {
+  const chatRef = React.useRef(null);
+
   const roomId = useSelector(selectRoomId);
   const roomMessages = useSelector(selectMessages);
   const dispatch = useDispatch();
@@ -27,31 +30,34 @@ function Chat() {
 
   //const [rowMessages] = useCollection(roomId && collection(db,'rooms',roomId,'messages'))
   //uplift this query
-  const q = query(
-    collection(db, "rooms", roomId, "messages"),
-    orderBy("timestamp", "asc")
-  );
 
   React.useEffect(() => {
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const messages = [];
-      querySnapshot.forEach((doc) => {
-        // messages.push(doc.data());
-        messages.push({
-          message: doc.data().message,
-          user: doc.data().user,
-          userImage: doc.data().userImage,
-          timestamp: new Date(
-            doc.data().timestamp?.seconds * 1000
-          ).toUTCString(),
+    const unsubscribe = onSnapshot(
+      query(
+        collection(db, "rooms", roomId, "messages"),
+        orderBy("timestamp", "asc")
+      ),
+      (querySnapshot) => {
+        const messages = [];
+        querySnapshot.forEach((doc) => {
+          // messages.push(doc.data());
+          messages.push({
+            message: doc.data().message,
+            user: doc.data().user,
+            userImage: doc.data().userImage,
+            timestamp: new Date(
+              doc.data().timestamp?.seconds * 1000
+            ).toUTCString(),
+          });
         });
-      });
-      console.log("Current messages: ", messages);
-      dispatch(setMessages(messages));
-    });
-
+        console.log("Current messages: ", messages);
+        dispatch(setMessages(messages));
+        chatRef?.current?.scrollIntoView({ behavior: "smooth" });
+      }
+    );
+    //chatRef?.current?.scrollIntoView({ behavior: "smooth" });
     return unsubscribe;
-  }, []);
+  }, [roomId]);
 
   return (
     <ChatContainer>
@@ -75,8 +81,19 @@ function Chat() {
 
           {roomMessages?.map((doc, index) => {
             const { message, timestamp, user, userImage } = doc;
-            return <div key={index}>{message}</div>;
+            // return <div key={index}>{message}</div>;
+
+            return (
+              <Message
+                key={index}
+                message={message}
+                timestamp={timestamp}
+                user={user}
+                userImage={userImage}
+              />
+            );
           })}
+          <ChatBottom ref={chatRef} />
         </ChatMessages>
 
         <ChatInput channelName={roomDetails?.data().name} channelId={roomId} />
@@ -86,6 +103,10 @@ function Chat() {
 }
 
 export default Chat;
+
+const ChatBottom = styled.div`
+  padding-bottom: 200px;
+`;
 
 const Header = styled.div`
   display: flex;

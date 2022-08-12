@@ -9,9 +9,11 @@ import {
   setDoc,
   serverTimestamp,
 } from "firebase/firestore";
-import { db } from "../firebase";
+import { auth, db } from "../firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
 const roomsRef = collection(db, "rooms");
 function ChatInput({ channelName, channelId }) {
+  const [user] = useAuthState(auth);
   const inputRef = useRef(null);
 
   const sendMessage = async (e) => {
@@ -22,12 +24,12 @@ function ChatInput({ channelName, channelId }) {
     }
 
     const col = collection(roomsRef, channelId, "messages");
-    console.log("cccc", col);
+
     await addDoc(col, {
       message: inputRef.current.value,
       timestamp: serverTimestamp(),
-      user: "johhn",
-      userImage: " ",
+      user: "user" && user?.displayName,
+      userImage: "pic url" && user?.photoURL,
     });
     inputRef.current.value = "";
   };
