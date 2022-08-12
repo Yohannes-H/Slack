@@ -34,7 +34,11 @@ function ChatInput({ channelName, channelId }) {
   return (
     <ChatInputContainer>
       <form>
-        <input type="text" placeholder={`Message #Room`} ref={inputRef} />
+        <input
+          type="text"
+          placeholder={`Message #${channelName}`}
+          ref={inputRef}
+        />
         <Button hidden type="submit" onClick={sendMessage}>
           SEND
         </Button>

@@ -5,15 +5,61 @@ import InfoIcon from "@mui/icons-material/Info";
 import { useSelector } from "react-redux";
 import { selectRoomId } from "../features/appSlice";
 import ChatInput from "./ChatInput";
+import { useCollection, useDocument } from "react-firebase-hooks/firestore";
+import {
+  collection,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
+import { db } from "../firebase";
+import { setMessages, selectMessages } from "../features/appSlice";
+import { useDispatch } from "react-redux";
 function Chat() {
   const roomId = useSelector(selectRoomId);
+  const roomMessages = useSelector(selectMessages);
+  const dispatch = useDispatch();
+  const [roomDetails] = useDocument(roomId && doc(db, "rooms", roomId), {
+    snapshotListenOptions: { includeMetadataChanges: true },
+  });
+
+  //const [rowMessages] = useCollection(roomId && collection(db,'rooms',roomId,'messages'))
+  //uplift this query
+  const q = query(
+    collection(db, "rooms", roomId, "messages"),
+    orderBy("timestamp", "asc")
+  );
+
+  React.useEffect(() => {
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const messages = [];
+      querySnapshot.forEach((doc) => {
+        // messages.push(doc.data());
+        messages.push({
+          message: doc.data().message,
+          user: doc.data().user,
+          userImage: doc.data().userImage,
+          timestamp: new Date(
+            doc.data().timestamp?.seconds * 1000
+          ).toUTCString(),
+        });
+      });
+      console.log("Current messages: ", messages);
+      dispatch(setMessages(messages));
+    });
+
+    return unsubscribe;
+  }, []);
+
   return (
     <ChatContainer>
       <>
         <Header>
           <HeaderLeft>
             <h4>
-              <strong>#room-name</strong>
+              <strong>#{roomDetails?.data().name}</strong>
             </h4>
             <StarBorderIcon />
           </HeaderLeft>
@@ -24,12 +70,16 @@ function Chat() {
           </HeaderRight>
         </Header>
 
-        <ChatMessages>{/** Listout messages */}</ChatMessages>
+        <ChatMessages>
+          {/** Listout messages */}
 
-        <ChatInput
-          //channelname
-          channelId={roomId}
-        />
+          {roomMessages?.map((doc, index) => {
+            const { message, timestamp, user, userImage } = doc;
+            return <div key={index}>{message}</div>;
+          })}
+        </ChatMessages>
+
+        <ChatInput channelName={roomDetails?.data().name} channelId={roomId} />
       </>
     </ChatContainer>
   );
